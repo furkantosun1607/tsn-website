@@ -1,0 +1,36 @@
+<div class="feed-container" (scroll)="onScroll($event)">
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Haberler Yükleniyor...</p>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div class="slide" *ngFor="let article of articles"
+         [style.backgroundImage]="article.image_url ? 'url(' + article.image_url + ')' : 'none'">
+      <div class="content-wrapper">
+        <div class="source-badge">
+          Son Dakika
+        </div>
+        
+        <h1 class="title">{{ article.title }}</h1>
+        
+        <p class="summary" *ngIf="article.summary">
+          {{ article.summary.length > 250 ? (article.summary | slice:0:250) + '...' : article.summary }}
+        </p>
+
+        <div class="metadata-bar">
+          <span class="date">{{ article.published_at | date:'medium' }}</span>
+          <a class="read-more-btn" [href]="article.link" target="_blank">Habere Git ↗</a>
+        </div>
+      </div>
+      
+      <!-- Overlay gradient to ensure text readability -->
+      <div class="gradient-overlay"></div>
+    </div>
+    
+    <div class="loading-more" *ngIf="isLoadingMore">
+      <div class="spinner small-spinner"></div>
+      <p>Daha Fazla Yükleniyor...</p>
+    </div>
+  </ng-container>
+</div>
