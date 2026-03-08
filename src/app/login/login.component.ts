@@ -83,7 +83,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     google.accounts.id.initialize({
       client_id: environment.googleClientId,
       callback: this.handleCredentialResponse.bind(this),
-      ux_mode: 'popup'
+      ux_mode: 'popup',
+      use_fedcm_for_prompt: false
     });
 
     google.accounts.id.renderButton(
