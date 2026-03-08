@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Article {
@@ -26,10 +26,12 @@ export class NewsService {
   constructor(private http: HttpClient) {}
 
   getNews(skip: number = 0, limit: number = 100): Observable<Article[]> {
-    return this.http.get<Article[]>(`${this.apiUrl}/?skip=${skip}&limit=${limit}`);
+    const headers = new HttpHeaders({ 'ngrok-skip-browser-warning': 'true' });
+    return this.http.get<Article[]>(`${this.apiUrl}/?skip=${skip}&limit=${limit}`, { headers });
   }
 
   getPersonalizedFeed(skip: number = 0, limit: number = 100): Observable<Article[]> {
-    return this.http.get<Article[]>(`${this.apiUrl}/feed?skip=${skip}&limit=${limit}`);
+    const headers = new HttpHeaders({ 'ngrok-skip-browser-warning': 'true' });
+    return this.http.get<Article[]>(`${this.apiUrl}/feed?skip=${skip}&limit=${limit}`, { headers });
   }
 }
