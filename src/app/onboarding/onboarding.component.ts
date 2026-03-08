@@ -8,7 +8,6 @@ import { AuthService } from '../services/auth/auth.service';
   selector: 'app-onboarding',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  providers: [AuthService],
   template: `
     <div class="onboarding-wrapper">
       <div class="onboarding-card">
@@ -69,76 +68,31 @@ import { AuthService } from '../services/auth/auth.service';
       max-width: 480px;
       box-shadow: 0 25px 60px rgba(0,0,0,0.25);
     }
-    .header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
+    .header { text-align: center; margin-bottom: 2.5rem; }
     .avatar img {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-bottom: 1rem;
-      border: 3px solid #667eea;
+      width: 80px; height: 80px; border-radius: 50%;
+      object-fit: cover; margin-bottom: 1rem; border: 3px solid #667eea;
     }
-    h2 {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: #1a1a2e;
-      margin: 0 0 0.5rem;
-    }
-    .header p {
-      color: #6b7280;
-      font-size: 0.95rem;
-    }
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 600;
-      color: #374151;
-      font-size: 0.9rem;
-    }
+    h2 { font-size: 1.75rem; font-weight: 800; color: #1a1a2e; margin: 0 0 0.5rem; }
+    .header p { color: #6b7280; font-size: 0.95rem; }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151; font-size: 0.9rem; }
     .form-group input {
-      width: 100%;
-      padding: 0.85rem 1rem;
-      border: 1.5px solid #e5e7eb;
-      border-radius: 12px;
-      font-size: 1rem;
+      width: 100%; padding: 0.85rem 1rem; border: 1.5px solid #e5e7eb;
+      border-radius: 12px; font-size: 1rem; outline: none; box-sizing: border-box;
       transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
-      box-sizing: border-box;
     }
-    .form-group input:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-    }
+    .form-group input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15); }
     .submit-btn {
-      width: 100%;
-      padding: 1rem;
+      width: 100%; padding: 1rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 0.5rem;
+      color: white; border: none; border-radius: 12px;
+      font-size: 1.05rem; font-weight: 700; cursor: pointer;
+      transition: all 0.3s ease; margin-top: 0.5rem;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
-    .submit-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-    }
-    .submit-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    .submit-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
   `]
 })
 export class OnboardingComponent implements OnInit {
@@ -168,12 +122,10 @@ export class OnboardingComponent implements OnInit {
   savePreferences(event: Event): void {
     event.preventDefault();
     if (!this.surname || !this.dateOfBirth) return;
-
     this.submitting = true;
     this.authService.completeOnboarding({
       surname: this.surname,
-      dateOfBirth: this.dateOfBirth,
-      categories: []
+      dateOfBirth: this.dateOfBirth
     });
     this.router.navigate(['/']);
   }

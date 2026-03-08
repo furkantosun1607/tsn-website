@@ -1,17 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject } from 'rxjs';
-import { SocialUser } from '@abacritt/angularx-social-login';
 
 export interface AppUser {
   email: string;
   firstName: string;
   lastName: string;
   photoUrl: string;
-  idToken: string;
-  // filled in after onboarding
   surname?: string;
   dateOfBirth?: string;
-  categories?: number[];
   onboardingComplete?: boolean;
 }
 
@@ -20,9 +17,16 @@ export interface AppUser {
 })
 export class AuthService {
   private readonly USER_KEY = 'tsn_user';
+  private isBrowser: boolean;
 
-  private currentUserSubject = new BehaviorSubject<AppUser | null>(this.loadFromStorage());
-  public currentUser$ = this.currentUserSubject.asObservable();
+  private currentUserSubject: BehaviorSubject<AppUser | null>;
+  public currentUser$;
+
+  constructor(@Inject(PLATFORM_ID) platformId: Object) {
+    this.isBrowser = isPlatformBrowser(platformId);
+    this.currentUserSubject = new BehaviorSubject<AppUser | null>(this.loadFromStorage());
+    this.currentUser$ = this.currentUserSubject.asObservable();
+  }
 
   get isAuthenticated(): boolean {
     return !!this.currentUserSubject.value;
@@ -32,27 +36,27 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  loginWithGoogle(socialUser: SocialUser): void {
+  loginWithGoogleCredential(credential: string): void {
+    // Decode the JWT payload (base64) to get user info
+    const payload = JSON.parse(atob(credential.split('.')[1]));
     const user: AppUser = {
-      email: socialUser.email ?? '',
-      firstName: socialUser.firstName ?? '',
-      lastName: socialUser.lastName ?? '',
-      photoUrl: socialUser.photoUrl ?? '',
-      idToken: socialUser.idToken ?? '',
+      email: payload.email || '',
+      firstName: payload.given_name || '',
+      lastName: payload.family_name || '',
+      photoUrl: payload.picture || '',
       onboardingComplete: false
     };
     this.saveToStorage(user);
     this.currentUserSubject.next(user);
   }
 
-  completeOnboarding(data: { surname: string; dateOfBirth: string; categories: number[] }): void {
+  completeOnboarding(data: { surname: string; dateOfBirth: string }): void {
     const user = this.currentUserSubject.value;
     if (!user) return;
     const updated: AppUser = {
       ...user,
       surname: data.surname,
       dateOfBirth: data.dateOfBirth,
-      categories: data.categories,
       onboardingComplete: true
     };
     this.saveToStorage(updated);
@@ -60,11 +64,14 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.USER_KEY);
+    if (this.isBrowser) {
+      localStorage.removeItem(this.USER_KEY);
+    }
     this.currentUserSubject.next(null);
   }
 
   private loadFromStorage(): AppUser | null {
+    if (!this.isBrowser) return null;
     try {
       const raw = localStorage.getItem(this.USER_KEY);
       return raw ? JSON.parse(raw) : null;
@@ -74,6 +81,8 @@ export class AuthService {
   }
 
   private saveToStorage(user: AppUser): void {
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    if (this.isBrowser) {
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    }
   }
 }
