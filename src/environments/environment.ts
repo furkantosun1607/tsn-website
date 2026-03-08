@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  googleClientId: '179638045847-tb7ea2053753c98saneg25pd4u9q111b.apps.googleusercontent.com',
+  googleClientId: '652863516519-o2iukuniud99gfc2ad41l7u298kem3d5.apps.googleusercontent.com',
   apiUrl: 'https://jonell-submental-punditically.ngrok-free.dev/api/v1'
 };
