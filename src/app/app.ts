@@ -12,7 +12,7 @@ import { AuthService } from './services/auth/auth.service';
       <div class="brand"><a routerLink="/">TSN Media</a></div>
       <div class="nav-links">
         <ng-container *ngIf="auth.currentUser$ | async as user; else loginLink">
-            <span class="greeting">Hi, {{ user.first_name }} 👋</span>
+            <span class="greeting">Hi, {{ user.firstName }} 👋</span>
             <a routerLink="/onboarding">Preferences</a>
             <button class="logout-btn" (click)="logout()">Logout</button>
         </ng-container>

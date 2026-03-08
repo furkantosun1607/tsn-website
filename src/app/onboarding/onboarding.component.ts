@@ -1,184 +1,179 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
-import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-onboarding',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="onboarding-container">
-      <h2>Personalize Your Feed</h2>
-      <form (submit)="savePreferences()">
-        <div class="form-group">
-          <label for="dob">Date of Birth</label>
-          <input type="date" id="dob" [(ngModel)]="dateOfBirth" name="dob" required>
-        </div>
-
-        <div class="categories-section">
-          <h3>Select Categories You Follow</h3>
-          <div *ngIf="categories.length === 0" class="loading">Loading categories...</div>
-          <div class="categories-grid">
-            <div *ngFor="let cat of categories" class="category-item">
-              <label>
-                <input type="checkbox" 
-                       [checked]="selectedCategories.has(cat.id)"
-                       (change)="toggleCategory(cat.id)">
-                <span>{{ cat.name }}</span>
-              </label>
-            </div>
+    <div class="onboarding-wrapper">
+      <div class="onboarding-card">
+        <div class="header">
+          <div class="avatar" *ngIf="photoUrl">
+            <img [src]="photoUrl" alt="Profil fotoğrafı">
           </div>
+          <h2>Merhaba, {{ firstName }}! 👋</h2>
+          <p>Sizi daha iyi tanımak için birkaç bilgiye ihtiyacımız var.</p>
         </div>
 
-        <button type="submit" class="submit-btn" [disabled]="submitting">
-          {{ submitting ? 'Saving...' : 'Save Preferences' }}
-        </button>
-      </form>
+        <form (submit)="savePreferences($event)">
+          <div class="form-group">
+            <label for="surname">Soyad</label>
+            <input
+              type="text"
+              id="surname"
+              [(ngModel)]="surname"
+              name="surname"
+              placeholder="Soyadınızı girin"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="dob">Doğum Tarihi</label>
+            <input
+              type="date"
+              id="dob"
+              [(ngModel)]="dateOfBirth"
+              name="dob"
+              required>
+          </div>
+
+          <button
+            type="submit"
+            class="submit-btn"
+            [disabled]="!surname || !dateOfBirth || submitting">
+            {{ submitting ? 'Kaydediliyor...' : 'Devam Et →' }}
+          </button>
+        </form>
+      </div>
     </div>
   `,
   styles: [`
-    .onboarding-container {
-      background: white;
-      padding: 3rem;
-      border-radius: var(--border-radius, 16px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      max-width: 650px;
-      margin: 3rem auto;
-      border: 1px solid rgba(0,0,0,0.05);
-    }
-    h2 { color: var(--text-primary, #111827); margin-bottom: 2rem; text-align: center; font-weight: 800; font-size: 2rem; }
-    h3 { color: var(--text-secondary, #4b5563); margin: 2rem 0 1.5rem; font-size: 1.2rem; font-weight: 600; }
-    
-    .form-group { margin-bottom: 2rem; }
-    .form-group label { display: block; margin-bottom: 0.75rem; font-weight: 600; color: var(--text-secondary, #4b5563); }
-    .form-group input { width: 100%; padding: 0.85rem 1rem; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: border-color 0.2s; outline: none; }
-    .form-group input:focus { border-color: var(--primary-color, #3b82f6); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-    
-    .categories-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2.5rem;
-    }
-    .category-item label {
+    .onboarding-wrapper {
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      padding: 0.85rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 1rem;
+    }
+    .onboarding-card {
+      background: white;
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .avatar img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+      border: 3px solid #667eea;
+    }
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #1a1a2e;
+      margin: 0 0 0.5rem;
+    }
+    .header p {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.9rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.85rem 1rem;
       border: 1.5px solid #e5e7eb;
-      border-radius: 8px;
-      transition: all 0.2s ease;
-      font-weight: 500;
-      color: var(--text-secondary, #4b5563);
-      user-select: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      box-sizing: border-box;
     }
-    .category-item label:hover { 
-      background-color: #f9fafb; 
-      border-color: #d1d5db;
+    .form-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
     }
-    
-    /* Styling checkbox visually */
-    .category-item input[type="checkbox"] {
-      width: 1.1rem;
-      height: 1.1rem;
-      accent-color: var(--primary-color, #3b82f6);
-      cursor: pointer;
-    }
-
-    /* Selected state */
-    .category-item label:has(input:checked) {
-      background-color: rgba(59, 130, 246, 0.05);
-      border-color: var(--primary-color, #3b82f6);
-      color: var(--primary-color, #3b82f6);
-    }
-    
     .submit-btn {
       width: 100%;
-      padding: 1.1rem;
-      background-color: var(--primary-color, #3b82f6);
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 1.15rem;
+      border-radius: 12px;
+      font-size: 1.05rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+      margin-top: 0.5rem;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
     }
-    .submit-btn:hover:not(:disabled) { 
-      background-color: var(--primary-hover, #2563eb); 
+    .submit-btn:hover:not(:disabled) {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
     }
-    .submit-btn:disabled { background-color: #93c5fd; cursor: not-allowed; box-shadow: none; transform: none; }
-    
-    .loading { text-align: center; padding: 2rem; color: #6b7280; font-style: italic; }
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
   `]
 })
 export class OnboardingComponent implements OnInit {
-  categories: any[] = [];
-  selectedCategories = new Set<number>();
-  dateOfBirth: string = '';
+  firstName = '';
+  photoUrl = '';
+  surname = '';
+  dateOfBirth = '';
   submitting = false;
 
   constructor(
-    private http: HttpClient,
-    private auth: AuthService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
-  ngOnInit() {
-    this.fetchCategories();
-    this.auth.currentUser$.subscribe(user => {
-      if (user) {
-        if (user.date_of_birth) this.dateOfBirth = user.date_of_birth;
-        if (user.categories) {
-          user.categories.forEach(c => this.selectedCategories.add(c.id));
-        }
-      }
-    });
-  }
-
-  fetchCategories() {
-    this.http.get<any[]>(`${environment.apiUrl}/categories`).subscribe({
-      next: (data) => this.categories = data,
-      error: (err) => console.error('Failed to fetch categories:', err)
-    });
-  }
-
-  toggleCategory(id: number) {
-    if (this.selectedCategories.has(id)) {
-      this.selectedCategories.delete(id);
-    } else {
-      this.selectedCategories.add(id);
+  ngOnInit(): void {
+    const user = this.authService.currentUser;
+    if (!user) {
+      this.router.navigate(['/login']);
+      return;
     }
+    this.firstName = user.firstName;
+    this.photoUrl = user.photoUrl;
+    if (user.surname) this.surname = user.surname;
+    if (user.dateOfBirth) this.dateOfBirth = user.dateOfBirth;
   }
 
-  savePreferences() {
-    if (!this.dateOfBirth) return;
-    this.submitting = true;
-    
-    const payload = {
-      date_of_birth: this.dateOfBirth,
-      category_ids: Array.from(this.selectedCategories)
-    };
+  savePreferences(event: Event): void {
+    event.preventDefault();
+    if (!this.surname || !this.dateOfBirth) return;
 
-    this.auth.updateOnboarding(payload).subscribe({
-      next: () => {
-        this.submitting = false;
-        this.router.navigate(['/']); // Go to personalized feed
-      },
-      error: (err) => {
-        console.error('Failed to save preferences', err);
-        this.submitting = false;
-        alert('Failed to save preferences');
-      }
+    this.submitting = true;
+    this.authService.completeOnboarding({
+      surname: this.surname,
+      dateOfBirth: this.dateOfBirth,
+      categories: []
     });
+    this.router.navigate(['/']);
   }
 }

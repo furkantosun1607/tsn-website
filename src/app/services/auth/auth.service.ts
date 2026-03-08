@@ -1,65 +1,79 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { BehaviorSubject } from 'rxjs';
+import { SocialUser } from '@abacritt/angularx-social-login';
 
-export interface User {
-  id: number;
-  first_name: string;
-  last_name: string;
+export interface AppUser {
   email: string;
-  date_of_birth?: string;
-  categories?: any[];
+  firstName: string;
+  lastName: string;
+  photoUrl: string;
+  idToken: string;
+  // filled in after onboarding
+  surname?: string;
+  dateOfBirth?: string;
+  categories?: number[];
+  onboardingComplete?: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = environment.apiUrl;
-  private tokenKey = 'access_token';
-  
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private readonly USER_KEY = 'tsn_user';
+
+  private currentUserSubject = new BehaviorSubject<AppUser | null>(this.loadFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
-    this.loadUser();
-  }
-
-  get token(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
   get isAuthenticated(): boolean {
-    return !!this.token;
+    return !!this.currentUserSubject.value;
   }
 
-  loginWithGoogle(credential: string): Observable<any> {
-    return this.http.post<{access_token: string}>(`${this.apiUrl}/auth/google`, { token: credential }).pipe(
-      tap(response => {
-        localStorage.setItem(this.tokenKey, response.access_token);
-        this.loadUser(); // Fetch profile after login
-      })
-    );
+  get currentUser(): AppUser | null {
+    return this.currentUserSubject.value;
+  }
+
+  loginWithGoogle(socialUser: SocialUser): void {
+    const user: AppUser = {
+      email: socialUser.email ?? '',
+      firstName: socialUser.firstName ?? '',
+      lastName: socialUser.lastName ?? '',
+      photoUrl: socialUser.photoUrl ?? '',
+      idToken: socialUser.idToken ?? '',
+      onboardingComplete: false
+    };
+    this.saveToStorage(user);
+    this.currentUserSubject.next(user);
+  }
+
+  completeOnboarding(data: { surname: string; dateOfBirth: string; categories: number[] }): void {
+    const user = this.currentUserSubject.value;
+    if (!user) return;
+    const updated: AppUser = {
+      ...user,
+      surname: data.surname,
+      dateOfBirth: data.dateOfBirth,
+      categories: data.categories,
+      onboardingComplete: true
+    };
+    this.saveToStorage(updated);
+    this.currentUserSubject.next(updated);
   }
 
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.USER_KEY);
     this.currentUserSubject.next(null);
   }
 
-  loadUser(): void {
-    if (this.isAuthenticated) {
-      this.http.get<User>(`${this.apiUrl}/user/me`).subscribe({
-        next: (user) => this.currentUserSubject.next(user),
-        error: () => this.logout() // Invalid token
-      });
+  private loadFromStorage(): AppUser | null {
+    try {
+      const raw = localStorage.getItem(this.USER_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
     }
   }
 
-  updateOnboarding(data: { date_of_birth: string, category_ids: number[] }): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/user/onboarding`, data).pipe(
-      tap(user => this.currentUserSubject.next(user))
-    );
+  private saveToStorage(user: AppUser): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
   }
 }
