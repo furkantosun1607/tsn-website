@@ -35,9 +35,7 @@ export class NewsFeed implements OnInit {
       this.loading = true;
     }
 
-    const feedObservable = this.authService.isAuthenticated 
-                           ? this.newsService.getPersonalizedFeed(this.skip, this.limit)
-                           : this.newsService.getNews(this.skip, this.limit);
+    const feedObservable = this.newsService.getNews(this.skip, this.limit);
 
     feedObservable.subscribe({
       next: (data) => {
