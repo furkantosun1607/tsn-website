@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule],
+  providers: [AuthService],
   template: `
     <div class="login-wrapper">
       <div class="login-card">

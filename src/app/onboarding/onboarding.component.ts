@@ -8,6 +8,7 @@ import { AuthService } from '../services/auth/auth.service';
   selector: 'app-onboarding',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  providers: [AuthService],
   template: `
     <div class="onboarding-wrapper">
       <div class="onboarding-card">
