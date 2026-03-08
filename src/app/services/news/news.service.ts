@@ -15,11 +15,13 @@ export interface Article {
   cluster_id: string;
 }
 
+import { environment } from '../../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class NewsService {
-  private apiUrl = 'http://localhost:8000/api/v1/news';
+  private apiUrl = `${environment.apiUrl}/news`;
 
   constructor(private http: HttpClient) {}
 
